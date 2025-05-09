@@ -32,7 +32,8 @@ apt install -y sudo curl wget git build-essential apt-transport-https ca-certifi
     htop neofetch ncdu tmux screen net-tools dnsutils tree zip \
     iotop nload iftop fail2ban openssh-server mosh rsync \
     ripgrep fd-find bat exa fzf jq python3-pip python3-venv \
-    neovim mlocate neofetch zsh zsh-autosuggestions zsh-syntax-highlighting ranger vim
+    neovim mlocate neofetch zsh zsh-autosuggestions zsh-syntax-highlighting ranger vim\
+    xauth x11-apps mesa-utils glances sysstat libgl1-mesa-glx
 
 # Setup bat alternative for cat with prettier output
 ln -s /usr/bin/batcat /usr/local/bin/bat 2>/dev/null || true
@@ -57,7 +58,7 @@ echo "Installing pfetch..."
 wget -q https://raw.githubusercontent.com/dylanaraps/pfetch/master/pfetch -O /usr/local/bin/pfetch
 chmod +x /usr/local/bin/pfetch
 
-# Install fastfetch
+# Install fastfetch FAILS CURRENTLY
 #echo "Installing fastfetch..."
 #apt install -y fastfetch || {
 #    echo "Fastfetch not available in default repos, trying from GitHub..."
@@ -118,12 +119,12 @@ apt update
 #apt update
 apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-buildx-plugin
 
-# Install Docker Compose
+# Install Docker Compose - Installed via docker plugins above
 #echo "Installing Docker Compose..."
 #curl -SL https://github.com/docker/compose/releases/download/v2.35.1/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
 #chmod +x /usr/local/bin/docker-compose
 
-# Install Portainer (Docker management UI)
+# Install Portainer (Docker management UI) FAILS with syntax error
 #echo "Installing Portainer..."
 #docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/>
 
@@ -179,6 +180,8 @@ PasswordAuthentication yes
 PubkeyAuthentication yes
 PermitEmptyPasswords no
 X11Forwarding yes
+X11DisplayOffset 10
+X11UseLocalhost yes
 AllowTcpForwarding yes
 MaxAuthTries 3
 LoginGraceTime 30
@@ -200,11 +203,55 @@ maxretry = 3
 bantime = 600
 EOF
 
+# User HOME directory
+USER_HOME=$(eval echo ~$USERNAME)
+
 # Modify .bashrc to add pfetch and set JetBrains Mono
 echo "Configuring .bashrc for $USERNAME..."
 USER_HOME=$(eval echo ~$USERNAME)
 echo -e "\n# Run pfetch on terminal startup\npfetch" >> $USER_HOME/.bashrc
 echo -e "\n# Set terminal font to JetBrains Mono Nerd Font\nGSETTINGS_SCHEMA=org.gnome.Terminal.Legacy.Profile:/org/gnome/terminal/legacy/profiles:/\nprofile=\$(gsettings get org.gnome.Terminal.ProfilesList default | tr -d \"'\")\ngsettings set \"\$GSETTINGS_SCHEMA\"\"\$profile\"/font 'JetBrainsMono Nerd Font 12'" >> $USER_HOME/.bashrc
+
+# Set better history control
+HISTCONTROL=ignoreboth
+HISTSIZE=10000
+HISTFILESIZE=20000
+shopt -s histappend
+shopt -s checkwinsize
+
+# Improved prompt with git branch display
+parse_git_branch() {
+    git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
+}
+PS1='\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[01;33m\] $(parse_git_branch)\[\033[00m\]\$ '
+
+# Useful aliases
+alias update='sudo apt update && sudo apt upgrade -y'
+alias install='sudo apt install -y'
+alias remove='sudo apt remove'
+alias cls='clear'
+alias ports='ss -tuln'
+alias myip='curl http://ipecho.net/plain; echo'
+alias df='df -h'
+alias du='du -h'
+alias free='free -h'
+alias grep='grep --color=auto'
+alias mkdir='mkdir -p'
+alias dc='docker-compose'
+alias dps='docker ps'
+alias dimg='docker images'
+alias vim='nvim'
+alias glxinfo='glxinfo | grep -i "direct rendering"'
+alias xeyes='DISPLAY=:0 xeyes'
+alias xclock='DISPLAY=:0 xclock'
+alias xterm='DISPLAY=:0 xterm'
+
+# Enable terminal colors
+export TERM=xterm-256color
+
+# Enable X11 forwarding settings
+export DISPLAY=:0
+export LIBGL_ALWAYS_INDIRECT=1
 
 # Set proper permissions for user's home directory
 chown -R $USERNAME:$USERNAME $USER_HOME
