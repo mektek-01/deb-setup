@@ -124,8 +124,8 @@ apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docke
 #chmod +x /usr/local/bin/docker-compose
 
 # Install Portainer (Docker management UI)
-echo "Installing Portainer..."
-docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/>
+#echo "Installing Portainer..."
+#docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/>
 
 # Install Tailscale
 echo "Installing Tailscale..."
@@ -288,3 +288,4 @@ if [[ $TAILSCALE_LOGIN =~ ^[Yy]$ ]]; then
 fi
 
 echo "Script completed successfully!"
+EOF
