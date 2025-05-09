@@ -30,9 +30,9 @@ echo "Installing base packages..."
 apt install -y sudo curl wget git build-essential apt-transport-https ca-certificates \
     gnupg lsb-release unzip fontconfig software-properties-common \
     htop neofetch ncdu tmux screen net-tools dnsutils tree zip \
-    iotop nload iftop fail2ban openssh-et erver mosh rsync \
+    iotop nload iftop fail2ban openssh-server mosh rsync \
     ripgrep fd-find bat exa fzf jq python3-pip python3-venv \
-    neovim mlocate zsh zsh-autosuggestions zsh-syntax-highlighting ranger vim
+    neovim mlocate neofetch zsh zsh-autosuggestions zsh-syntax-highlighting ranger vim
 
 # Setup bat alternative for cat with prettier output
 ln -s /usr/bin/batcat /usr/local/bin/bat 2>/dev/null || true
@@ -58,14 +58,14 @@ wget -q https://raw.githubusercontent.com/dylanaraps/pfetch/master/pfetch -O /us
 chmod +x /usr/local/bin/pfetch
 
 # Install fastfetch
-echo "Installing fastfetch..."
-apt install -y fastfetch || {
-    echo "Fastfetch not available in default repos, trying from GitHub..."
-    FASTFETCH_VERSION="1.12.2"
-    wget -q https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VERSION}/fastfetch-linux-amd64.deb -O /tmp/fastfetch.deb
-    apt install -y /tmp/fastfetch.deb
-    rm /tmp/fastfetch.deb
-}
+#echo "Installing fastfetch..."
+#apt install -y fastfetch || {
+#    echo "Fastfetch not available in default repos, trying from GitHub..."
+#    FASTFETCH_VERSION="1.12.2"
+#    wget -q https://github.com/fastfetch-cli/fastfetch/releases/download/${FASTFETCH_VERSION}/fastfetch-linux-amd64.deb -O /tmp/fastfetch.deb
+#    apt install -y /tmp/fastfetch.deb
+#    rm /tmp/fastfetch.deb
+#}
 
 #Configure vim with sensible defaults
 cat > /etc/vim/vimrc.local << 'EOF'
@@ -98,15 +98,16 @@ EOF
 
 # Install Docker
 echo "Installing Docker..."
-curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
 apt update
-apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-buildx-plugin
 
 # Install Docker Compose
-echo "Installing Docker Compose..."
-curl -SL https://github.com/docker/compose/releases/download/v2.17.2/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
-chmod +x /usr/local/bin/docker-compose
+#echo "Installing Docker Compose..."
+#curl -SL https://github.com/docker/compose/releases/download/v2.35.1/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+#chmod +x /usr/local/bin/docker-compose
 
 # Install Portainer (Docker management UI)
 echo "Installing Portainer..."
