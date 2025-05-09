@@ -125,7 +125,6 @@ apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docke
 
 # Install Portainer (Docker management UI)
 echo "Installing Portainer..."
-docker volume create portainer_data
 docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/>
 
 # Install Tailscale
@@ -210,7 +209,7 @@ echo -e "\n# Set terminal font to JetBrains Mono Nerd Font\nGSETTINGS_SCHEMA=org
 # Set proper permissions for user's home directory
 chown -R $USERNAME:$USERNAME $USER_HOME
 
-  )
+  {
 
   typeset -g POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(
     status                  # exit code of the last command
