@@ -14,11 +14,44 @@ if ! id "$USERNAME" &>/dev/null; then
     exit 1
 fi
 
+# Get Git user information
+read -p "Enter Git user name: " GIT_USERNAME
+read -p "Enter Git email address: " GIT_EMAIL
+
+# Ask about web management panel
+read -p "Install Cockpit web management panel? (y/n): " INSTALL_COCKPIT
+INSTALL_COCKPIT=$(echo "$INSTALL_COCKPIT" | tr '[:upper:]' '[:lower:]')
+
+# Ask about firewall setup
+read -p "Configure UFW firewall? (y/n): " SETUP_UFW
+SETUP_UFW=$(echo "$SETUP_UFW" | tr '[:upper:]' '[:lower:]')
+
+# Ask about monitoring setup
+read -p "Install monitoring tools (Netdata)? (y/n): " INSTALL_MONITORING
+INSTALL_MONITORING=$(echo "$INSTALL_MONITORING" | tr '[:upper:]' '[:lower:]')
+
 echo "========================================================"
 echo "Debian 12 Post-Installation Setup Script"
 echo "========================================================"
 echo "Setting up system for user: $USERNAME"
 echo
+
+if [[ "$INSTALL_COCKPIT" == "y" ]]; then
+    echo "Cockpit web management panel will be installed"
+fi
+if [[ "$SETUP_UFW" == "y" ]]; then
+    echo "UFW firewall will be configured"
+fi
+if [[ "$INSTALL_MONITORING" == "y" ]]; then
+    echo "Netdata monitoring will be installed"
+fi
+
+# Get user home directory
+USER_HOME=$(eval echo ~$USERNAME)
+
+# Create a directory for admin scripts
+mkdir -p /usr/local/admin-scripts
+mkdir -p $USER_HOME/scripts
 
 # Enable non-free and non-free-firmware repositories
 echo "Enabling non-free repositories..."
@@ -33,7 +66,31 @@ apt install -y sudo curl wget git build-essential apt-transport-https ca-certifi
     iotop nload iftop fail2ban openssh-server mosh rsync \
     ripgrep fd-find bat exa fzf jq python3-pip python3-venv \
     neovim mlocate neofetch zsh zsh-autosuggestions zsh-syntax-highlighting ranger vim\
-    xauth x11-apps mesa-utils glances sysstat libgl1-mesa-glx
+    xauth x11-apps mesa-utils glances sysstat libgl1-mesa-glx\
+    xorg xserver-xorg xauth x11-apps x11-utils x11-xserver-utils \
+    mesa-utils libgl1-mesa-glx xdg-utils libxss1 \
+    xfonts-base xterm xclock x11-apps xeyes xvfb golang-go btop\
+    ntp chrony ethtool smartmontools lm-sensors \
+    acl attr mc rdiff-backup logrotate molly-guard needrestart pwgen \
+    apt-listchanges unattended-upgrades plocate byobu debsums
+
+# Configure unattended-upgrades
+cat > /etc/apt/apt.conf.d/50unattended-upgrades << EOF
+Unattended-Upgrade::Allowed-Origins {
+    "\${distro_id}:\${distro_codename}";
+    "\${distro_id}:${distro_codename}-security";
+};
+Unattended-Upgrade::Automatic-Reboot "true";
+EOF
+systemctl enable --now unattended-upgrades.service
+
+# Install GitHub CLI
+echo "Installing GitHub CLI..."
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share>
+chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archiv>
+apt update
+apt install -y gh git git-lfs
 
 # Setup bat alternative for cat with prettier output
 ln -s /usr/bin/batcat /usr/local/bin/bat 2>/dev/null || true
@@ -128,6 +185,35 @@ apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docke
 #echo "Installing Portainer..."
 #docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/>
 
+# Install LazyDocker
+echo "Installing LazyDocker..."
+if command -v go &>/dev/null; then
+    GO111MODULE=on go install github.com/jesseduffield/lazydocker@latest
+    # Check if installation was successful via Go
+    if [ ! -f "/root/go/bin/lazydocker" ]; then
+        echo "Go installation of LazyDocker failed, trying direct download..."
+        LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker>
+        curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releas>
+        mkdir -p /tmp/lazydocker
+        tar xf /tmp/lazydocker.tar.gz -C /tmp/lazydocker
+        mv /tmp/lazydocker/lazydocker /usr/local/bin/
+        chmod +x /usr/local/bin/lazydocker
+        rm -rf /tmp/lazydocker /tmp/lazydocker.tar.gz
+    else
+        # Move from Go bin to /usr/local/bin
+        mv /root/go/bin/lazydocker /usr/local/bin/
+    fi
+else
+    echo "Go not found, downloading LazyDocker binary directly..."
+    LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker/rel>
+    curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/l>
+    mkdir -p /tmp/lazydocker
+    tar xf /tmp/lazydocker.tar.gz -C /tmp/lazydocker
+    mv /tmp/lazydocker/lazydocker /usr/local/bin/
+    chmod +x /usr/local/bin/lazydocker
+    rm -rf /tmp/lazydocker /tmp/lazydocker.tar.gz
+fi
+
 # Install Tailscale
 echo "Installing Tailscale..."
 curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
@@ -160,7 +246,7 @@ fc-cache -fv
 
 # Add user to sudo and other groups
 echo "Adding $USERNAME to necessary groups..."
-usermod -aG sudo,adm,docker,dialout,plugdev,netdev "$USERNAME"
+usermod -aG sudo,adm,docker,dialout,plugdev,netdev,audio,video "$USERNAME"
 
 # Configure sudo with insults
 echo "Configuring sudo with insults..."
@@ -206,6 +292,37 @@ EOF
 # User HOME directory
 USER_HOME=$(eval echo ~$USERNAME)
 
+# Set up Xresources for better X11 appearance
+cat > $USER_HOME/.Xresources << 'EOF'
+! Terminal settings
+XTerm*faceName: JetBrainsMono Nerd Font
+XTerm*faceSize: 11
+XTerm*background: black
+XTerm*foreground: lightgray
+XTerm*saveLines: 2000
+XTerm*scrollBar: true
+XTerm*rightScrollBar: true
+XTerm*selectToClipboard: true
+XTerm*VT100.translations: #override \
+    Shift <KeyPress> Insert: insert-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>V: insert-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+    Ctrl <Key> minus: smaller-vt-font() \n\
+    Ctrl <Key> plus: larger-vt-font()
+EOF
+
+# Make user own their Xresources file
+chown $USERNAME:$USERNAME $USER_HOME/.Xresources
+
+# Configure Git for the user
+echo "Configuring Git for $USERNAME..."
+su - $USERNAME -c "git config --global user.name \"$GIT_USERNAME\""
+su - $USERNAME -c "git config --global user.email \"$GIT_EMAIL\""
+su - $USERNAME -c "git config --global core.editor \"vim\""
+su - $USERNAME -c "git config --global init.defaultBranch \"main\""
+su - $USERNAME -c "git config --global color.ui auto"
+su - $USERNAME -c "git config --global pull.rebase false"
+
 # Modify .bashrc to add pfetch and set JetBrains Mono
 echo "Configuring .bashrc for $USERNAME..."
 USER_HOME=$(eval echo ~$USERNAME)
@@ -245,6 +362,12 @@ alias glxinfo='glxinfo | grep -i "direct rendering"'
 alias xeyes='DISPLAY=:0 xeyes'
 alias xclock='DISPLAY=:0 xclock'
 alias xterm='DISPLAY=:0 xterm'
+
+# X11 test commands
+alias xeyes='xeyes &'
+alias xclock='xclock &'
+alias xterm='xterm &'
+alias testx11='xeyes & xclock &'
 
 # Enable terminal colors
 export TERM=xterm-256color
@@ -319,6 +442,16 @@ systemctl start tailscaled
 # Clean up
 echo "Cleaning up..."
 rm -rf /tmp/fonts
+# Restart SSH for X11 forwarding to take effect
+echo "Restarting SSH service..."
+systemctl restart ssh
+
+# Final update & cleanup
+echo "Running final update and cleanup..."
+apt update
+apt upgrade -y
+apt autoremove -y
+apt autoclean
 
 echo "========================================================"
 echo "Installation complete!"
