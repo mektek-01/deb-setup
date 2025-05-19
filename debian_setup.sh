@@ -85,12 +85,12 @@ EOF
 systemctl enable --now unattended-upgrades.service
 
 # Install GitHub CLI
-echo "Installing GitHub CLI..."
-curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share>
-chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archiv>
-apt update
-apt install -y gh git git-lfs
+#echo "Installing GitHub CLI..."
+#curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share>
+#chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+#echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archiv>
+#apt update
+#apt install -y gh git git-lfs
 
 # Setup bat alternative for cat with prettier output
 ln -s /usr/bin/batcat /usr/local/bin/bat 2>/dev/null || true
@@ -113,7 +113,7 @@ fi
 # Install pfetch
 echo "Installing pfetch..."
 wget -q https://raw.githubusercontent.com/dylanaraps/pfetch/master/pfetch -O /usr/local/bin/pfetch
-chmod +x /usr/local/bin/pfetch
+chmod +x /usr/local/bin/pfetchcat /
 
 # Install fastfetch FAILS CURRENTLY
 #echo "Installing fastfetch..."
