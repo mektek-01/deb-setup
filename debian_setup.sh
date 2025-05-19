@@ -186,33 +186,33 @@ apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin docke
 #docker run -d -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/>
 
 # Install LazyDocker
-echo "Installing LazyDocker..."
-if command -v go &>/dev/null; then
-    GO111MODULE=on go install github.com/jesseduffield/lazydocker@latest
-    # Check if installation was successful via Go
-    if [ ! -f "/root/go/bin/lazydocker" ]; then
-        echo "Go installation of LazyDocker failed, trying direct download..."
-        LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker>
-        curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releas>
-        mkdir -p /tmp/lazydocker
-        tar xf /tmp/lazydocker.tar.gz -C /tmp/lazydocker
-        mv /tmp/lazydocker/lazydocker /usr/local/bin/
-        chmod +x /usr/local/bin/lazydocker
-        rm -rf /tmp/lazydocker /tmp/lazydocker.tar.gz
-    else
-        # Move from Go bin to /usr/local/bin
-        mv /root/go/bin/lazydocker /usr/local/bin/
-    fi
-else
-    echo "Go not found, downloading LazyDocker binary directly..."
-    LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker/rel>
-    curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/l>
-    mkdir -p /tmp/lazydocker
-    tar xf /tmp/lazydocker.tar.gz -C /tmp/lazydocker
-    mv /tmp/lazydocker/lazydocker /usr/local/bin/
-    chmod +x /usr/local/bin/lazydocker
-    rm -rf /tmp/lazydocker /tmp/lazydocker.tar.gz
-fi
+#echo "Installing LazyDocker..."
+#if command -v go &>/dev/null; then
+#    GO111MODULE=on go install github.com/jesseduffield/lazydocker@latest
+#    # Check if installation was successful via Go
+#    if [ ! -f "/root/go/bin/lazydocker" ]; then
+#        echo "Go installation of LazyDocker failed, trying direct download..."
+#        LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker>
+#        curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releas>
+#        mkdir -p /tmp/lazydocker
+#        tar xf /tmp/lazydocker.tar.gz -C /tmp/lazydocker
+#        mv /tmp/lazydocker/lazydocker /usr/local/bin/
+#        chmod +x /usr/local/bin/lazydocker
+#        rm -rf /tmp/lazydocker /tmp/lazydocker.tar.gz
+#    else
+#        # Move from Go bin to /usr/local/bin
+#        mv /root/go/bin/lazydocker /usr/local/bin/
+#    fi
+#else
+#    echo "Go not found, downloading LazyDocker binary directly..."
+#    LAZYDOCKER_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazydocker/rel>
+#    curl -Lo /tmp/lazydocker.tar.gz "https://github.com/jesseduffield/lazydocker/releases/l>
+#    mkdir -p /tmp/lazydocker
+#    tar xf /tmp/lazydocker.tar.gz -C /tmp/lazydocker
+#    mv /tmp/lazydocker/lazydocker /usr/local/bin/
+#    chmod +x /usr/local/bin/lazydocker
+#    rm -rf /tmp/lazydocker /tmp/lazydocker.tar.gz
+#fi
 
 # Install Tailscale
 echo "Installing Tailscale..."
@@ -248,7 +248,7 @@ fc-cache -fv
 echo "Adding $USERNAME to necessary groups..."
 usermod -aG sudo,adm,docker,dialout,plugdev,netdev,audio,video "$USERNAME"
 
-# Configure sudo with insults
+# Configure sudo with insults3M0De9XyM3Pl
 echo "Configuring sudo with insults..."
 echo 'Defaults insults' > /etc/sudoers.d/insults
 echo 'Defaults timestamp_timeout=30' >> /etc/sudoers.d/insults
