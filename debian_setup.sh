@@ -70,7 +70,7 @@ apt install -y sudo curl wget git build-essential apt-transport-https ca-certifi
     xorg xserver-xorg xauth x11-apps x11-utils x11-xserver-utils \
     mesa-utils libgl1-mesa-glx xdg-utils libxss1 \
     xfonts-base xterm x11-apps xvfb golang-go btop\
-    ntp chrony ethtool smartmontools lm-sensors \
+    ethtool smartmontools lm-sensors \
     acl attr mc rdiff-backup logrotate molly-guard needrestart pwgen \
     apt-listchanges unattended-upgrades plocate byobu debsums
 
