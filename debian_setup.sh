@@ -467,4 +467,4 @@ if [[ $TAILSCALE_LOGIN =~ ^[Yy]$ ]]; then
 fi
 
 echo "Script completed successfully!"
-EOF
+
