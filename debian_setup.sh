@@ -309,7 +309,6 @@ XTerm*VT100.translations: #override \
     Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
     Ctrl <Key> minus: smaller-vt-font() \n\
     Ctrl <Key> plus: larger-vt-font()
-EOF
 
 # Make user own their Xresources file
 chown $USERNAME:$USERNAME $USER_HOME/.Xresources
