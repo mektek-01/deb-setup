@@ -426,10 +426,10 @@ chown -R $USERNAME:$USERNAME $USER_HOME
 EOF
 
 # Set up basic tmux configuration
-echo "Configuring tmux..."
-cat > $USER_HOME/.tmux.conf << 'EOF'
+#echo "Configuring tmux..."
+#cat > $USER_HOME/.tmux.conf << 'EOF'
 # Improve colors
-set -g default-terminal "screen-256color"
+#set -g default-terminal "screen-256color"
 
 # Enable and start services
 echo "Enabling and starting services..."
